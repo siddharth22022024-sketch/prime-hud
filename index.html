@@ -1,4 +1,310 @@
-  // J.A.R.V.I.S. / F.R.I.D.A.Y. Female Voice Unlock Greeting
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S.</title>
+<style>
+  :root {
+    --bg: #020813;
+    --panel: rgba(6, 20, 40, 0.72);
+    --border: rgba(0, 212, 255, 0.28);
+    --cyan: #00d4ff;
+    --cyan-soft: rgba(0, 212, 255, 0.14);
+    --cyan-glow: rgba(0, 212, 255, 0.45);
+    --text: #e0f7ff;
+    --muted: #679bb5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  body {
+    background: radial-gradient(circle at 50% 45%, #072242 0%, #030d1e 55%, var(--bg) 100%);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 14px 24px 20px;
+    position: relative;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+  #dimmer {
+    position: fixed; inset: 0; background: #000; opacity: 0;
+    pointer-events: none; z-index: 999; transition: opacity 0.1s;
+  }
+  .top-time {
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-shadow: 0 0 10px var(--cyan-glow);
+    font-variant-numeric: tabular-nums;
+    z-index: 2;
+  }
+  .hud-grid {
+    display: grid;
+    grid-template-columns: 290px 1fr 290px;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    z-index: 2;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    backdrop-filter: blur(8px);
+    box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+  }
+  .panel::after {
+    content: ""; position: absolute; top: -1px; left: 24px; right: 24px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+  .sec-title {
+    font-size: 10px; letter-spacing: 2.2px; color: var(--muted);
+    text-transform: uppercase; border-bottom: 1px solid rgba(0,212,255,0.12);
+    padding-bottom: 6px;
+  }
+  .row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+  .val { color: var(--cyan); font-weight: 700; letter-spacing: 0.5px; }
+  .bar { width: 100%; height: 5px; background: rgba(0,212,255,0.12); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .bar-fill { height: 100%; width: 0%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transition: width 0.3s; }
+
+  .core-stage {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; height: 340px; cursor: pointer;
+  }
+  .ring {
+    position: absolute; border-radius: 50%;
+    border: 1.5px solid rgba(0, 212, 255, 0.25);
+  }
+  .r1 { width: 310px; height: 310px; border-style: dashed; animation: spin 28s linear infinite; }
+  .r2 {
+    width: 255px; height: 255px;
+    border-top: 3px solid var(--cyan); border-bottom: 3px solid var(--cyan);
+    border-left: 1px solid transparent; border-right: 1px solid transparent;
+    box-shadow: 0 0 25px rgba(0,212,255,0.2);
+    animation: spin-rev 14s linear infinite;
+  }
+  .r3 {
+    width: 205px; height: 205px;
+    border: 1px solid rgba(0, 212, 255, 0.45);
+    box-shadow: inset 0 0 30px rgba(0, 212, 255, 0.22);
+  }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+  @keyframes spin-rev { 100% { transform: rotate(-360deg); } }
+
+  .jarvis-title {
+    font-size: 32px; font-weight: 800; letter-spacing: 8px; padding-left: 8px;
+    color: #fff; text-shadow: 0 0 18px var(--cyan), 0 0 35px var(--cyan);
+    z-index: 3;
+  }
+  .jarvis-sub {
+    font-size: 10px; letter-spacing: 3px; color: var(--cyan);
+    margin-top: 8px; z-index: 3; text-transform: uppercase;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 4px;
+    background: rgba(0,212,255,0.2); border-radius: 4px; outline: none; margin-top: 6px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--cyan); box-shadow: 0 0 10px var(--cyan); cursor: pointer;
+  }
+  .hud-btn {
+    background: var(--cyan-soft); border: 1px solid var(--border);
+    color: var(--cyan); padding: 7px 10px; border-radius: 6px;
+    font-size: 11px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase;
+    transition: 0.2s;
+  }
+  .hud-btn:hover { background: rgba(0,212,255,0.28); box-shadow: 0 0 12px var(--cyan-glow); }
+
+  .dock {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    z-index: 2;
+  }
+  .app-tile {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s ease;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .app-tile:hover {
+    border-color: var(--cyan);
+    background: rgba(0, 212, 255, 0.16);
+    box-shadow: 0 0 20px var(--cyan-glow);
+    transform: translateY(-3px);
+  }
+  .app-name { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #fff; }
+  .app-tag { font-size: 9px; letter-spacing: 1.5px; color: var(--cyan); text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div id="dimmer"></div>
+
+  <div class="top-time" id="top-time">--:-- // LOADING</div>
+
+  <div class="hud-grid">
+    <div class="panel">
+      <div class="sec-title">System & Power Core</div>
+      <div>
+        <div class="row"><span>Battery Level</span><span class="val" id="bat-val">SCANNING...</span></div>
+        <div class="bar"><div class="bar-fill" id="bat-bar"></div></div>
+      </div>
+      <div class="row"><span>System Status</span><span class="val" id="sys-stat">OPTIMAL // ONLINE</span></div>
+
+      <div class="sec-title" style="margin-top:4px">Network & Bluetooth</div>
+      <div class="row"><span>Wi-Fi Link</span><span class="val" id="wifi-stat">CHECKING...</span></div>
+      <div class="row"><span>Connected Client</span><span class="val" id="wifi-client">PRIMEBOOK-14 (1.1.1.1)</span></div>
+      <div class="row"><span>Bluetooth Radio</span><span class="val" id="bt-stat">CHECKING...</span></div>
+      <button class="hud-btn" onclick="scanBluetooth()">Scan / Pair Bluetooth</button>
+    </div>
+
+    <div class="core-stage" onclick="greetBoss(true)" title="Tap to greet">
+      <div class="ring r1"></div>
+      <div class="ring r2"></div>
+      <div class="ring r3"></div>
+      <div class="jarvis-title">J.A.R.V.I.S.</div>
+      <div class="jarvis-sub" id="voice-status">TAP CORE TO INITIALIZE VOICE</div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-title">Environment & Audio</div>
+      <div>
+        <div class="row"><span>HUD Brightness</span><span class="val" id="bright-val">100%</span></div>
+        <input type="range" min="25" max="100" value="100" oninput="setBrightness(this.value)">
+      </div>
+      <div>
+        <div class="row"><span>Voice Gain / Volume</span><span class="val" id="vol-val">100%</span></div>
+        <input type="range" min="0" max="100" value="100" oninput="setVolume(this.value)">
+      </div>
+      <div class="row" style="margin-top:4px">
+        <button class="hud-btn" style="flex:1;margin-right:6px" onclick="greetBoss(true)">Test Voice</button>
+        <button class="hud-btn" style="flex:1" onclick="toggleMute()" id="mute-btn">Mute</button>
+      </div>
+      <div class="sec-title" style="margin-top:4px">Security Protocol</div>
+      <div class="row"><span>Encrypted DNS</span><span class="val">CLOUDFLARE TLS</span></div>
+      <div class="row"><span>Active User</span><span class="val">BOSS</span></div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <a class="app-tile" href="https://www.pw.live" target="_blank">
+      <span class="app-name">PHYSICS WALLAH</span>
+      <span class="app-tag">JEE BATCH</span>
+    </a>
+    <a class="app-tile" href="https://web.whatsapp.com" target="_blank">
+      <span class="app-name">WHATSAPP</span>
+      <span class="app-tag">COMMS</span>
+    </a>
+    <a class="app-tile" href="https://www.youtube.com" target="_blank">
+      <span class="app-name">YOUTUBE</span>
+      <span class="app-tag">MEDIA STREAM</span>
+    </a>
+    <a class="app-tile" href="https://gemini.google.com" target="_blank">
+      <span class="app-name">GEMINI</span>
+      <span class="app-tag">NEURAL CORE</span>
+    </a>
+    <a class="app-tile" href="https://account.protonvpn.com" target="_blank">
+      <span class="app-name">PROTON VPN</span>
+      <span class="app-tag">TUNNEL SHIELD</span>
+    </a>
+    <a class="app-tile" href="https://www.google.com" target="_blank">
+      <span class="app-name">BROWSER</span>
+      <span class="app-tag">WEB ACCESS</span>
+    </a>
+  </div>
+
+<script>
+  function syncTime() {
+    const now = new Date();
+    const t = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const d = now.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase();
+    document.getElementById('top-time').textContent = `${t}  //  ${d}`;
+  }
+  setInterval(syncTime, 1000); syncTime();
+
+  if (navigator.getBattery) {
+    navigator.getBattery().then(b => {
+      const upd = () => {
+        const p = Math.round(b.level * 100);
+        document.getElementById('bat-val').textContent = p + '%' + (b.charging ? ' [CHARGING]' : '');
+        document.getElementById('bat-bar').style.width = p + '%';
+      };
+      upd();
+      b.addEventListener('levelchange', upd);
+      b.addEventListener('chargingchange', upd);
+    });
+  } else {
+    document.getElementById('bat-val').textContent = 'AC POWERED';
+  }
+
+  function syncNet() {
+    const online = navigator.onLine;
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const speed = conn && conn.downlink ? ` (${conn.downlink} Mbps)` : '';
+    document.getElementById('wifi-stat').textContent = online ? `CONNECTED${speed}` : 'OFFLINE';
+    document.getElementById('sys-stat').textContent = online ? 'OPTIMAL // ONLINE' : 'AIR-GAPPED';
+  }
+  window.addEventListener('online', syncNet);
+  window.addEventListener('offline', syncNet);
+  syncNet();
+
+  if (navigator.bluetooth && navigator.bluetooth.getAvailability) {
+    navigator.bluetooth.getAvailability().then(avail => {
+      document.getElementById('bt-stat').textContent = avail ? 'AVAILABLE // STANDBY' : 'UNAVAILABLE';
+    }).catch(() => {
+      document.getElementById('bt-stat').textContent = 'READY';
+    });
+  } else {
+    document.getElementById('bt-stat').textContent = 'SYSTEM MANAGED';
+  }
+
+  async function scanBluetooth() {
+    if (!navigator.bluetooth) { alert('Open PrimeOS Settings > Bluetooth to view paired devices.'); return; }
+    try {
+      const dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+      document.getElementById('bt-stat').textContent = 'LINKED: ' + (dev.name || 'DEVICE').toUpperCase();
+    } catch (e) {}
+  }
+
+  let hudVolume = 1.0, isMuted = false;
+  function setBrightness(val) {
+    document.getElementById('bright-val').textContent = val + '%';
+    document.getElementById('dimmer').style.opacity = (100 - val) / 115;
+  }
+  function setVolume(val) {
+    hudVolume = val / 100;
+    document.getElementById('vol-val').textContent = val + '%';
+  }
+  function toggleMute() {
+    isMuted = !isMuted;
+    document.getElementById('mute-btn').textContent = isMuted ? 'Unmute' : 'Mute';
+    if (isMuted && window.speechSynthesis) speechSynthesis.cancel();
+  }
+
   let lastGreet = 0;
   function greetBoss(force = false) {
     if (isMuted || !('speechSynthesis' in window)) return;
@@ -22,3 +328,12 @@
     document.getElementById('voice-status').textContent = 'SYSTEMS ONLINE // READY, BOSS';
     speechSynthesis.speak(msg);
   }
+
+  window.speechSynthesis.onvoiceschanged = () => {};
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') greetBoss(false);
+  });
+  window.addEventListener('pointerdown', () => greetBoss(false), { once: true });
+</script>
+</body>
+</html>
